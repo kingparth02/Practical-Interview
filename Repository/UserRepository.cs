@@ -96,46 +96,43 @@ namespace ManagementApp.Repository
         }
 
         public bool DeleteUser(int id)
+{
+    using (IDbConnection db = new SqlConnection(_connectionString))
+    {
+        db.Open();
+        using (var transaction = db.BeginTransaction())
         {
-            using (IDbConnection db = new SqlConnection(_connectionString))
+            try
             {
-                db.Open();
-                using (var transaction = db.BeginTransaction())
+                var parameters = new DynamicParameters();
+                parameters.Add("@Id", id);
+
+                // Call the stored procedure
+                var result = db.QuerySingle<int>("sp_DeleteUser",
+                    parameters,
+                    transaction: transaction,
+                    commandType: CommandType.StoredProcedure);
+
+                if (result > 0)
                 {
-                    try
-                    {
-                        var parameters = new DynamicParameters();
-                        parameters.Add("@Id", id);
-
-                        Console.WriteLine($"Attempting to delete user with Id: {id}");
-
-                        var result = db.Execute("sp_DeleteUser", parameters,
-                            transaction: transaction,
-                            commandType: CommandType.StoredProcedure);
-
-                        if (result > 0)
-                        {
-                            transaction.Commit();
-                            return true;
-                        }
-                        else
-                        {
-                            transaction.Rollback();
-                            Console.WriteLine("Failed to delete the user.");
-                            return false;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        // Log more detailed information
-                        transaction.Rollback();
-                        Console.WriteLine("Error in DeleteUser: " + ex.Message);
-                        throw;
-                    }
+                    transaction.Commit();
+                    return true;
+                }
+                else
+                {
+                    transaction.Rollback();
+                    return false;
                 }
             }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                Console.WriteLine($"Error in DeleteUser: {ex.Message}");
+                throw;  // Consider logging instead of re-throwing if you don't need to propagate the exception
+            }
         }
-
+    }
+}
 
 
 
