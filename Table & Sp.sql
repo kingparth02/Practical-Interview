@@ -259,8 +259,7 @@ BEGIN
 
      DELETE FROM Users WHERE Id = @Id;
 
-    -- Optionally return the number of rows affected
-    SELECT @@ROWCOUNT;
+     RETURN @@ROWCOUNT;  
 END
 GO
 -----------------------------------------------------------------------------------------------------------------------------------------
