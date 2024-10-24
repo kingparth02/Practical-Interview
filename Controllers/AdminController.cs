@@ -161,27 +161,26 @@ namespace ManagementApp.Controllers
 
 
 
-        [AdminAuth]
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id)
+[ValidateAntiForgeryToken]
+public ActionResult Delete(int id)
+{
+    try
+    {
+        var success = _userRepository.DeleteUser(id);
+        if (success)
         {
-            try
-            {
-                var success = _userRepository.DeleteUser(id);
-                if (success)
-                {
-                    return RedirectToAction("Index");
-                }
-                return RedirectToAction("Index");
-            }
-            catch (Exception ex)
-            {
-                // Log the error
-                Console.WriteLine($"Error deleting user {id}: {ex.Message}");
-                return Json(new { success = false, message = "An error occurred while deleting the user." });
-            }
+            return RedirectToAction("Index");
         }
+        return RedirectToAction("Index");
+    }
+    catch (Exception ex)
+    {
+        // Log the error
+        Console.WriteLine($"Error deleting user {id}: {ex.Message}");
+        return Json(new { success = false, message = "An error occurred while deleting the user." });
+    }
+}
 
 
 
