@@ -257,22 +257,10 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    BEGIN TRY
-        BEGIN TRANSACTION
-            -- Delete user categories
-            DELETE FROM UserCategory WHERE UserId = @Id
-            
-            -- Delete the user
-            DELETE FROM Users WHERE Id = @Id
-            
-        COMMIT TRANSACTION
-    END TRY
-    BEGIN CATCH
-        IF @@TRANCOUNT > 0
-            ROLLBACK TRANSACTION
+     DELETE FROM Users WHERE Id = @Id;
 
-        THROW
-    END CATCH
+    -- Optionally return the number of rows affected
+    SELECT @@ROWCOUNT;
 END
 GO
 -----------------------------------------------------------------------------------------------------------------------------------------
