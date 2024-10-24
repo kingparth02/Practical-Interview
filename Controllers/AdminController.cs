@@ -176,12 +176,11 @@ public ActionResult Delete(int id)
     }
     catch (Exception ex)
     {
-        // Log the error
-        Console.WriteLine($"Error deleting user {id}: {ex.Message}");
+        // Log the error with detailed information
+        Console.WriteLine($"Error deleting user {id}: {ex.Message}\n{ex.StackTrace}");
         return Json(new { success = false, message = "An error occurred while deleting the user." });
     }
 }
-
 
 
         public ActionResult Logout()
