@@ -1,0 +1,77 @@
+﻿@model ManagementApp.Models.User
+@{
+    ViewBag.Title = "Create User";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">
+        <h3>Create User</h3>
+    </div>
+    <div class="card-body">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+
+            <div class="form-group mb-3">
+                <label for="Name">Name</label>
+                <input type="text" id="Name" name="Name" class="form-control" required />
+                @Html.ValidationMessage("Name", "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="Email">Email</label>
+                <input type="email" id="Email" name="Email" class="form-control" required />
+                @Html.ValidationMessage("Email", "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="Phone">Phone</label>
+                <input type="text" id="Phone" name="Phone" class="form-control" required />
+                @Html.ValidationMessage("Phone", "", new { @class = "text-danger" })
+            </div>
+            <div class="form-group mb-3">
+                @Html.LabelFor(m => m.Password)
+                @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group mb-3">
+                <label>Categories</label>
+                <select id="categories" name="categories" class="form-control" multiple>
+                    @foreach (var category in (IEnumerable<ManagementApp.Models.Category>)ViewBag.Categories)
+                    {
+                        <option value="@category.Id">@category.Name</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Create User</button>
+                <a href="@Url.Action("Index")" class="btn btn-secondary">Cancel</a>
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            // Initialize select2 for better multiple select experience
+            $('#categories').select2({
+                placeholder: "Select categories",
+                allowClear: true
+            });
+        });
+    </script>
+}
+
+

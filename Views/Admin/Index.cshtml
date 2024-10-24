@@ -1,0 +1,87 @@
+﻿@model IEnumerable<ManagementApp.Models.User>
+@{
+    ViewBag.Title = "Manage Users";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="header">
+    <div class="admin-info">
+        <span>Hello, @Session["UserName"]!</span>
+        <a href="@Url.Action("Logout", "Admin")" class="btn btn-danger btn-sm pull-left">Logout</a>
+    </div>
+</div>
+<br/>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Manage Users</h2>
+    <a href="@Url.Action("Create")" class="btn btn-primary">Add New User</a>
+</div>
+<br/>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Categories</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr data-user-id="@user.Id">
+                    <td>@user.Name</td>
+                    <td>@user.Email</td>
+                    <td>@user.Phone</td>
+                    <td>@user.Categories</td>
+                    <td>
+                        <a href="@Url.Action("Edit", new { id = user.Id })" class="btn btn-sm btn-info">Edit</a>
+                        @*<button class="btn btn-sm btn-danger delete-user">Delete</button>*@
+                        @using (Html.BeginForm("Delete", "Admin", new { id = user.Id }, FormMethod.Post, new { onsubmit = "return confirm('Are you sure you want to delete this user?');" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-link text-danger" style="padding:0; border:none; background:none;">
+                                Delete
+                            </button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+    <script>
+    $(function () {
+        $('.delete-user').click(function () {
+            if (confirm('Are you sure you want to delete this user?')) {
+                var row = $(this).closest('tr');
+                var userId = row.data('user-id');
+
+                // Include anti-forgery token
+                var token = $('input[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+                    url: '@Url.Action("Delete")',
+                    type: 'POST',
+                    data: { id: userId, __RequestVerificationToken: token },
+                    success: function (response) {
+                        if (response.success) {
+                            row.remove();
+                            toastr.success('User deleted successfully');
+                        } else {
+                            toastr.error(response.message || 'Failed to delete user');
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.error('Error:', textStatus, errorThrown);
+                        toastr.error('An error occurred while deleting the user.');
+                    }
+                });
+            }
+        });
+    });
+    </script>
+
+

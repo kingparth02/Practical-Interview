@@ -1,0 +1,13 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<div class="header">
+    <div class="admin-info">
+        <span>Hello, @Session["UserName"]!</span>
+        <a href="@Url.Action("Logout", "Admin")" class="btn btn-danger btn-sm pull-left">Logout</a>
+    </div>
+</div>
+
+

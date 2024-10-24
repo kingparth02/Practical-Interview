@@ -1,0 +1,130 @@
+﻿@model ManagementApp.Models.User
+@{
+    ViewBag.Title = "Edit User";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var selectedCategories = ViewBag.SelectedCategories as List<int> ?? new List<int>();
+}
+
+<div class="card">
+    <div class="card-header">
+        <h3>Edit User</h3>
+    </div>
+    <div class="card-body">
+        @if (!string.IsNullOrEmpty(TempData["ErrorMessage"]?.ToString()))
+        {
+            <div class="alert alert-danger">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
+        <form id="editUserForm" method="post">
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.Id)
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="Name">Name</label>
+                        @Html.TextBoxFor(m => m.Name, new { @class = "form-control", required = "required" })
+                        @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="Email">Email</label>
+                        @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email", required = "required" })
+                        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="Phone">Phone</label>
+                        @Html.TextBoxFor(m => m.Phone, new { @class = "form-control", required = "required" })
+                        @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label>Categories</label>
+                        <select id="categories" name="categories" class="form-control" multiple>
+                            @foreach (var category in (IEnumerable<ManagementApp.Models.Category>)ViewBag.Categories)
+                            {
+                                <option value="@category.Id" @(selectedCategories.Contains(category.Id) ? "selected" : "")>
+                                    @category.Name
+                                </option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mt-3">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="@Url.Action("Index", "Admin")" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+        </div>
+    </div>
+        @section scripts {
+            <script>
+        $(function() {
+            // Initialize select2
+            $('#categories').select2({
+                placeholder: "Select categories",
+                allowClear: true
+            });
+
+            $('#editUserForm').on('submit', function(e) {
+                e.preventDefault(); // Prevent default form submission
+
+                if (!$(this).valid()) {
+                    return false; // Stop if validation fails
+                }
+
+                // Get form data
+                var formData = new FormData(this);
+                var selectedCategories = $('#categories').val();
+                if (selectedCategories) {
+                    formData.set('categories', selectedCategories.join(','));
+                }
+
+                // Disable submit button and show loading state
+                var $submitButton = $('button[type="submit"]');
+                $submitButton.prop('disabled', true)
+                    .html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...');
+
+                // Make AJAX request
+                $.ajax({
+                    url: '@Url.Action("Edit", "Admin")',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success(response.message || 'User updated successfully');
+                            setTimeout(function() {
+                                window.location.href = '@Url.Action("Index", "Admin")';
+                            }, 1500);
+                        } else {
+                            toastr.error(response.message || 'Failed to update user');
+                            if (response.errors && response.errors.length > 0) {
+                                response.errors.forEach(function(error) {
+                                    toastr.error(error);
+                                });
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        toastr.error('An error occurred while updating the user');
+                        console.error('Error:', error);
+                    },
+                    complete: function() {
+                        // Re-enable submit button
+                        $submitButton.prop('disabled', false).html('Save Changes');
+                    }
+                });
+            });
+        });
+            </script>
+        }
+
